@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_31_005303) do
+ActiveRecord::Schema.define(version: 2019_12_31_181230) do
 
   create_table "cards", force: :cascade do |t|
     t.string "suit"
@@ -21,8 +21,6 @@ ActiveRecord::Schema.define(version: 2019_12_31_005303) do
     t.string "name"
     t.integer "chips"
     t.integer "round_id"
-    t.integer "card_id1"
-    t.integer "card_id2"
   end
 
   create_table "round_cards", force: :cascade do |t|
@@ -31,7 +29,7 @@ ActiveRecord::Schema.define(version: 2019_12_31_005303) do
   end
 
   create_table "rounds", force: :cascade do |t|
-    t.string "name"
+    t.integer "num"
   end
 
 end
