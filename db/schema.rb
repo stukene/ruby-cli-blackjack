@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 2019_12_31_192344) do
 
   create_table "dealers", force: :cascade do |t|
     t.string "name"
+    t.integer "card_total"
   end
 
   create_table "player_cards", force: :cascade do |t|
@@ -35,6 +36,7 @@ ActiveRecord::Schema.define(version: 2019_12_31_192344) do
     t.string "name"
     t.integer "chips"
     t.integer "dealer_id"
+    t.integer "card_total"
   end
 
 end

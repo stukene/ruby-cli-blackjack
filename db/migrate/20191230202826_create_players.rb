@@ -4,6 +4,7 @@ class CreatePlayers < ActiveRecord::Migration[5.2]
       t.string :name
       t.integer :chips
       t.integer :dealer_id
+      t.integer :card_total
 
     end
   end
