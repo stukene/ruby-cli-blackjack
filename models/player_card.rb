@@ -1,3 +1,4 @@
 class PlayerCard < ActiveRecord::Base
-    has_many :cards
+    belongs_to :player
+    belongs_to :card
 end

@@ -10,26 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_31_181230) do
+ActiveRecord::Schema.define(version: 2019_12_31_192344) do
 
   create_table "cards", force: :cascade do |t|
     t.string "suit"
     t.string "rank"
   end
 
-  create_table "players", force: :cascade do |t|
-    t.string "name"
-    t.integer "chips"
-    t.integer "round_id"
-  end
-
-  create_table "round_cards", force: :cascade do |t|
-    t.integer "round_id"
+  create_table "dealer_cards", force: :cascade do |t|
+    t.integer "dealer_id"
     t.integer "card_id"
   end
 
-  create_table "rounds", force: :cascade do |t|
-    t.integer "num"
+  create_table "dealers", force: :cascade do |t|
+    t.string "name"
+  end
+
+  create_table "player_cards", force: :cascade do |t|
+    t.integer "player_id"
+    t.integer "card_id"
+  end
+
+  create_table "players", force: :cascade do |t|
+    t.string "name"
+    t.integer "chips"
+    t.integer "dealer_id"
   end
 
 end
