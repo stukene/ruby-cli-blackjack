@@ -419,7 +419,7 @@ class CommandLineInterface
             end
             dealer.save
         end
-        if(dealer.card_total < 17)
+        if(dealer.card_total < 17 && check_card_total(card_total) == true)
             dealer_hit
         end
 
@@ -436,7 +436,7 @@ class CommandLineInterface
         count = player_card_total.count
         while(i < count)
             player_card_total[i]
-            if(dealer_total < player_card_total[i])
+            if(dealer_total < player_card_total[i] && player_card_total[i] < 22)
                 return true
             end
             i +=1
