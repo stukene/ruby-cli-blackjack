@@ -161,6 +161,41 @@ class CommandLineInterface
 
     end
 
+    #Input
+    #* Payer object
+    #*
+    #Output
+    #*
+    #Description
+    #*Menu that call functions to and takes user input
+    def bet_menu(player)
+        puts "It's #{player.name}'s turn!\n"
+        puts "Press B to bet (only ends the turn in current state)"
+        puts "Press N to change name"
+        puts "Press Q to quit\n"
+    
+        input = gets.chomp
+        #does nothing as of now
+        if(input.downcase.eql? "b")
+
+        elsif(input.downcase.eql? "q")
+            Player.find(player.id).destroy
+            return false
+        elsif(input.downcase.eql? "n")
+            puts "Enter new Name"
+            name = gets.chomp
+            player.name = name
+            player.save
+            bet_menu(player)
+
+
+        else
+            puts "Not a valid input"
+            bet_menu(player)
+        end
+    end
+
+
 
     #Input
     #*Player object as input
@@ -256,40 +291,6 @@ class CommandLineInterface
 
         elsif(suit == "♥" || suit == "♦")
             return :red
-        end
-    end
-
-    #Input
-    #* Payer object
-    #*
-    #Output
-    #*
-    #Description
-    #*Menu that call functions to and takes user input
-    def bet_menu(player)
-        puts "It's #{player.name} turn!\n"
-        puts "Press B to bet (only ends the turn in current state)"
-        puts "Press N to change name"
-        puts "Press Q to quit\n"
-    
-        input = gets.chomp
-        #does nothing as of now
-        if(input.downcase.eql? "b")
-
-        elsif(input.downcase.eql? "q")
-            Player.find(player.id).destroy
-            return false
-        elsif(input.downcase.eql? "n")
-            puts "Enter new Name"
-            name = gets.chomp
-            player.name = name
-            player.save
-            bet_menu(player)
-
-
-        else
-            puts "Not a valid input"
-            bet_menu(player)
         end
     end
 
@@ -456,7 +457,7 @@ class CommandLineInterface
             puts "The Dealer got #{d_total}"
             puts "You got #{p_total}"
             #winner
-            if(p_total > d_total && p_total < 22 || d_total > 21 || p_total == 21)
+            if(p_total > d_total && p_total < 22 || d_total > 21 && p_total < 22 || p_total == 21)
                 puts "You won you winner!\n\n"
             elsif(p_total == d_total && p_total < 22)
                 puts "It's a tie you keep your money!\n\n"
