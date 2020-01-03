@@ -23,7 +23,7 @@ class CommandLineInterface
         dealer = Dealer.create(name: "Dealer")
         Player.delete_all
         while count < num
-            puts "Enter player #{count +1} name:"
+            puts "Enter player #{count +1}'s name:"
             name = gets.chomp
             Player.create(name: name, chips: chips, dealer_id: dealer.id)
             count += 1
@@ -75,8 +75,8 @@ class CommandLineInterface
             rank1 = get_rank(Card.find_by(id: card1).rank)
             rank2 = get_rank(Card.find_by(id: card2).rank)
             total = rank1 + rank2
-            if(card_total > 21)
-                card_total = 12
+            if(total > 21)
+                total = 12
             end
             players[i].card_total = total
             players[i].save
@@ -124,14 +124,22 @@ class CommandLineInterface
     #Output
     #*
     def game_menu(player)
-        puts "It's #{player.name} turn!\n"
-        puts "Press H to hit (ends turn as of now)"
+        puts "It's #{player.name}'s turn!\n"
+        puts "Press H to hit"
         puts "Press D to display cards"
         puts "Press E to end turn"
         input = gets.chomp
 
         if(input.downcase.eql? "h")
+            if(player.card_total > 21)
+               puts "You already busted you dummy!"
+            elsif(player.card_total == 21)
+                puts "You already won you dummy!"
 
+            else 
+                hit(player)
+            end
+            game_menu(player)
         elsif(input.downcase.eql? "d")
             display_palyer_cards(player)
             game_menu(player)
@@ -192,7 +200,6 @@ class CommandLineInterface
             color = get_color_of_card(suit)
             suit = suit.colorize(color)
             rank = card.rank
-            card_total += get_rank(rank)
             bs = ""
             if(rank == "10")
                 bs = "\b"
@@ -253,8 +260,8 @@ class CommandLineInterface
     def bet_menu(player)
         puts "It's #{player.name} turn!\n"
         puts "Press B to bet (passes turn in current state)"
-        puts "Press Q to quit"
-        puts "Press N to change name\n"
+        puts "Press N to change name"
+        puts "Press Q to quit\n"
     
         input = gets.chomp
         puts "\n\n"
@@ -277,6 +284,156 @@ class CommandLineInterface
         end
     end
 
+    #Input
+    #* A player from game menu
+    #Output
+    #* 
+    #Description
+    #*Takes in player grabs all cards in play to create deck
+    #*Then calculates the total after the hit accounting for aces
+    def hit(player)
+ 
+        deck = get_deck
+        card_id = deck.sample
+        card = Card.find_by(id: card_id)
+        PlayerCard.create(player_id: player.id, card_id: card_id)
+        rank = get_rank(card.rank)
+        if(rank == 11)
+            if((player.card_total + rank) > 21)
+                player.card_total += 1
+            else
+                player.card_total += rank
+            end
+        else 
+            player.card_total += rank
+        end
+        if(player.card_total > 21)
+            #past player cards to check for aces to make them
+            #add only a one to the total
+            p_cards = PlayerCard.where(player_id: player.id).pluck(:card_id)
+            aces = p_cards.select{|id| id >= 49}
+            non_aces = p_cards.select{|id| id < 49}
+            # only does if there are aces 
+            # otherwise total is final
+            if(aces != [])
+                non_ace_cards = Card.where(id: non_aces)
+                n_count = non_ace_cards.count
+                ace_count = aces.count
+                i = 0
+                sum = 0
+                while i < n_count 
+                  sum += get_rank(non_ace_cards[i].rank)
+                  i += 1
+                end
+                j = 0
+                # calculate adding the rest of the aces
+                while j < ace_count
+                    if(sum + 11 > 21 || (sum + (11 + ace_count - (j+1))) > 21)
+                        sum += 1
+                    else 
+                        sum += 11
+                    end
+                    j+=1
+                end
+                player.card_total = sum
+            end
+        end
+        player.save
+    end
+
+    #Helper function that gets the deck
+    def get_deck
+        p_card_ids = PlayerCard.pluck(:card_id)
+        card_ids = Card.pluck(:id)
+        d_card_ids = DealerCard.pluck(:card_id)
+        deck = card_ids - p_card_ids
+        deck = deck - d_card_ids
+        return deck
+
+    end
+
+    # Input 
+    # *
+    # Output
+    # *
+    # Description
+    # *Hits cards on dealer and handles aces
+    # *simliar to hit for player
+    def dealer_hit
+        dealer = Dealer.first
+        card_total = dealer.card_total
+        if(card_total < 17 && check_card_total(card_total) == true)
+            deck = get_deck
+            card_id = deck.sample
+            card = Card.find_by(id: card_id)
+            DealerCard.create(dealer_id: dealer.id, card_id: card_id)
+            rank = get_rank(card.rank)
+            if(rank == 11)
+                if((dealer.card_total + rank) > 21)
+                    dealer.card_total += 1
+                else
+                    dealer.card_total += rank
+                end
+            else 
+                dealer.card_total += rank
+            end
+            if(dealer.card_total > 21)
+                #past dealer cards to check for aces to make them
+                #add only a one to the total
+                p_cards = DealerCard.where(dealer_id: dealer.id).pluck(:card_id)
+                aces = p_cards.select{|id| id >= 49}
+                non_aces = p_cards.select{|id| id < 49}
+                # only does if there are aces 
+                # otherwise total is final
+                if(aces != [])
+                    non_ace_cards = Card.where(id: non_aces)
+                    n_count = non_ace_cards.count
+                    ace_count = aces.count
+                    i = 0
+                    sum = 0
+                    while i < n_count 
+                      sum += get_rank(non_ace_cards[i].rank)
+                      i += 1
+                    end
+                    j = 0
+                    # calculate adding the rest of the aces
+                    while j < ace_count
+                        if(sum + 11 > 21 || (sum + (11 + ace_count - (j+1))) > 21)
+                            sum += 1
+                        else 
+                            sum += 11
+                        end
+                        j+=1
+                    end
+                    dealer.card_total = sum
+                end
+            end
+            dealer.save
+        end
+        if(dealer.card_total < 17)
+            dealer_hit
+        end
+
+    end
+    # Input 
+    # *Dealer card total
+    # Output
+    # *Boolean
+    # Description
+    # *Checks dealer card total against all players 
+    def check_card_total(dealer_total)
+        player_card_total = Player.all.pluck(:card_total)
+        i = 0
+        count = player_card_total.count
+        while(i < count)
+            player_card_total[i]
+            if(dealer_total < player_card_total[i])
+                return true
+            end
+            i +=1
+        end
+        return false
+    end
 
     def end_game 
         i = 0
@@ -290,16 +447,17 @@ class CommandLineInterface
             puts "The Dealer got #{d_total}"
             puts "You got #{p_total}"
             #winner
-            if(p_total > d_total || p_total == 21)
+            if(p_total > d_total && p_total < 22 || d_total > 21 || p_total == 21)
                 puts "You won you winner!\n\n"
+
             #loser
-            elsif(p_total <= d_total)
+            elsif(p_total <= d_total || p_total > 21)
                 puts "You lost you loser!\n\n"
             end
-            sleep(4)
+  
             i += 1
         end
-        sleep(5)
-        puts"\n\n\n\n\n\n"
+        sleep(2)
+        puts"\n\n\n"
     end
 end
