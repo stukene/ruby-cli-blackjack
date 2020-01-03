@@ -5,7 +5,6 @@ class CommandLineInterface
     #greets player
     def greet
         puts "Welcome to Blackjack!"
-
     end
  
     #Input
@@ -13,6 +12,8 @@ class CommandLineInterface
     #*
     #Output
     #*
+    #*Description
+    #*Sets up the tables for the players and Dealer
     def player_setup
         puts "How many chips will each player start with?"
         chips = gets.chomp.to_i
@@ -36,6 +37,9 @@ class CommandLineInterface
     #*
     #Output
     #*
+    #Desrition
+    #*Gives cards to dealer and player(s)
+    #*and creates the Join tables DealerCard and PlayerCard
     def deal_cards
         #creates deck
         deck = [*(1..52)]
@@ -89,6 +93,9 @@ class CommandLineInterface
     #*
     #Output
     #*
+    #Description
+    #*Call bet_menu for each player
+    #* and refactors if a player quits
     def bet
         i = 0
         count = Player.all.count
@@ -108,6 +115,8 @@ class CommandLineInterface
     #*
     #Output
     #*
+    #Description
+    #*Call game menu for each player
     def play_game
         i = 0
         count = Player.all.count
@@ -154,10 +163,9 @@ class CommandLineInterface
 
 
     #Input
-    #*
-    #*
+    #*Player object as input
     #Output
-    #*
+    #*Prints dealer cards and Player cards
     def display_palyer_cards(player)
         #Display dealer card first
         dealer_card = Card.find_by(id: DealerCard.first.card_id)
@@ -239,10 +247,9 @@ class CommandLineInterface
     end
 
     #Input
-    #*
-    #*
+    #*Car suit input
     #Output
-    #*
+    #*return color (black or red)
     def get_color_of_card(suit)
         if(suit == "♣" || suit == "♠")
             return :black
@@ -253,18 +260,20 @@ class CommandLineInterface
     end
 
     #Input
-    #*
+    #* Payer object
     #*
     #Output
     #*
+    #Description
+    #*Menu that call functions to and takes user input
     def bet_menu(player)
         puts "It's #{player.name} turn!\n"
-        puts "Press B to bet (passes turn in current state)"
+        puts "Press B to bet (only ends the turn in current state)"
         puts "Press N to change name"
         puts "Press Q to quit\n"
     
         input = gets.chomp
-        puts "\n\n"
+        #does nothing as of now
         if(input.downcase.eql? "b")
 
         elsif(input.downcase.eql? "q")
@@ -449,7 +458,8 @@ class CommandLineInterface
             #winner
             if(p_total > d_total && p_total < 22 || d_total > 21 || p_total == 21)
                 puts "You won you winner!\n\n"
-
+            elsif(p_total == d_total && p_total < 22)
+                puts "It's a tie you keep your money!\n\n"
             #loser
             elsif(p_total <= d_total || p_total > 21)
                 puts "You lost you loser!\n\n"

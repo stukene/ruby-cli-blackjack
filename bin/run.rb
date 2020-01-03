@@ -8,7 +8,9 @@ while Player.all.count > 0
     cli.bet
     cli.deal_cards
     cli.play_game
-    cli.dealer_hit
+    if(Player.all.count > 0)
+        cli.dealer_hit
+    end
     cli.end_game
 end
 
