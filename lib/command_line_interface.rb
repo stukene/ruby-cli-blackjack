@@ -170,14 +170,18 @@ class CommandLineInterface
     #*Menu that call functions to and takes user input
     def bet_menu(player)
         puts "It's #{player.name}'s turn!\n"
-        puts "Press B to bet (only ends the turn in current state)"
+        puts "Press B to place bet"
+        puts "Press C to check chips"
         puts "Press N to change name"
         puts "Press Q to quit\n"
     
         input = gets.chomp
         #does nothing as of now
         if(input.downcase.eql? "b")
-
+            place_bet(player)
+        elsif(input.downcase.eql? "c")
+            puts"You have #{player.chips} chips"
+            bet_menu(player)
         elsif(input.downcase.eql? "q")
             Player.find(player.id).destroy
             return false
@@ -195,6 +199,18 @@ class CommandLineInterface
         end
     end
 
+    def place_bet(player)
+        puts "How much would you like to bet?"
+        bet = gets.chomp.to_i
+        if(bet > player.chips)
+            puts "Bet is too large try again"
+            place_bet(player)
+        else 
+            player.chips-=bet
+            player.bet = bet
+            player.save
+        end
+    end
 
 
     #Input
@@ -458,17 +474,44 @@ class CommandLineInterface
             puts "You got #{p_total}"
             #winner
             if(p_total > d_total && p_total < 22 || d_total > 21 && p_total < 22 || p_total == 21)
+                calculate_winnings(players[i])
                 puts "You won you winner!\n\n"
             elsif(p_total == d_total && p_total < 22)
                 puts "It's a tie you keep your money!\n\n"
+                calculate_tie(players[i])
             #loser
             elsif(p_total <= d_total || p_total > 21)
                 puts "You lost you loser!\n\n"
+                calculate_loss(players[i])
             end
   
             i += 1
         end
         sleep(2)
         puts"\n\n\n"
+    end
+
+    def calculate_winnings(player)
+        winnings = player.bet*2
+        player.bet = 0
+        player.chips += winnings
+        player.save
+    end
+
+    def calculate_tie(player)
+        winnings = player.bet
+        player.bet = 0
+        player.chips += winnings
+        player.save
+    end
+
+    def calculate_loss(player)
+        winnings = player.bet
+        player.bet = 0
+        if(player.chips <= 0)
+            puts "You lost all your chips"
+            Player.find(player.id).destroy
+        end
+        player.save
     end
 end
