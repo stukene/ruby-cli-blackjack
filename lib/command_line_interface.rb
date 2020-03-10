@@ -24,6 +24,7 @@ class CommandLineInterface
         dealer = Dealer.create(name: "Dealer")
         Player.delete_all
         while count < num
+            system("clear")
             puts "Enter player #{count +1}'s name:"
             name = gets.chomp
             Player.create(name: name, chips: chips, dealer_id: dealer.id)
@@ -133,13 +134,16 @@ class CommandLineInterface
     #Output
     #*
     def game_menu(player)
-        puts "It's #{player.name}'s turn!\n"
-        puts "Press H to hit"
-        puts "Press D to display cards"
-        puts "Press E to end turn"
-        input = gets.chomp
 
-        if(input.downcase.eql? "h")
+        prompt = TTY::Prompt.new
+        input = prompt.select("It's #{player.name}'s turn!") do |menu|
+            menu.choice 'Hit'
+            menu.choice 'Display Cards'
+            menu.choice 'End Turn'
+        end   
+   
+
+        if(input.eql? "Hit")
             if(player.card_total > 21)
                puts "You already busted you dummy!"
             elsif(player.card_total == 21)
@@ -149,14 +153,10 @@ class CommandLineInterface
                 hit(player)
             end
             game_menu(player)
-        elsif(input.downcase.eql? "d")
+        elsif(input.eql? 'Display Cards')
             display_palyer_cards(player)
             game_menu(player)
-        elsif(input.downcase.eql? "e")
 
-        else
-            puts "Not a valid input"
-            game_menu(player)
         end
 
     end
@@ -169,33 +169,28 @@ class CommandLineInterface
     #Description
     #*Menu that call functions to and takes user input
     def bet_menu(player)
-        puts "It's #{player.name}'s turn!\n"
-        puts "Press B to place bet"
-        puts "Press C to check chips"
-        puts "Press N to change name"
-        puts "Press Q to quit\n"
-    
-        input = gets.chomp
-        #does nothing as of now
-        if(input.downcase.eql? "b")
+        prompt = TTY::Prompt.new
+        input = prompt.select("It's #{player.name}'s turn!") do |menu|
+            menu.choice 'Place Bet'
+            menu.choice 'Check Your Chips'
+            menu.choice 'Change Name'
+            menu.choice 'Quit Game'
+        end   
+        if(input.eql? 'Place Bet')
             place_bet(player)
-        elsif(input.downcase.eql? "c")
+        elsif(input.eql? 'Check Your Chips')
             puts"You have #{player.chips} chips"
             bet_menu(player)
-        elsif(input.downcase.eql? "q")
+        elsif(input.eql? 'Quit Game')
             Player.find(player.id).destroy
             return false
-        elsif(input.downcase.eql? "n")
+        elsif(input.eql? 'Change Name')
             puts "Enter new Name"
             name = gets.chomp
             player.name = name
             player.save
             bet_menu(player)
 
-
-        else
-            puts "Not a valid input"
-            bet_menu(player)
         end
     end
 
